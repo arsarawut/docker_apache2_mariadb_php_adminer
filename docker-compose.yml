@@ -1,0 +1,50 @@
+version: "3.2"
+
+services:
+
+  apache:
+    environment:
+      - bootstrap.memory_lock=true
+    build: .
+    depends_on:
+      - mariadb
+    networks:
+      - backend
+      - frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./apache2/www:/var/www/html
+    container_name: "${APACHE_NAME}"
+    environment:
+      - TZ=Asia/Bangkok
+    restart: always
+
+  mariadb:
+    image: mariadb:${MARIADB_VERSION:-latest}
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mariadb:/var/lib/mysql
+    networks:
+      - backend
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+    container_name: "${MARIADB_NAME}"
+
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - backend
+    restart: always
+    container_name: "${ADMINER_NAME}"
+
+networks:
+  backend:
+  frontend:
